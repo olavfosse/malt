@@ -4,14 +4,21 @@
             [nextjournal.clerk :as cle]
             [no.olavfosse.malt :refer :all])
   (:import java.awt.image.BufferedImage))
-
-(axes-grid {:height 300
-            :width 600})
-(plot #(* 30 (Math/sin (/ % 10))))
-(plot identity)
+;; # Chapter 1
 
 (def line-xs [2.0 1.0 4.0 3.0])
 (def line-ys [1.8 1.2 4.2 3.3])
+(plot {:range [[-1 5] [-1 5]]
+       ;; :cells-per-axis-unit 2
+       :points (map vector line-xs line-ys)})
+
+;; ---- mess
+
+
+(plot #(* 30 (Math/sin (/ % 10))))
+(plot identity)
+
+
 
 clv/default-viewers
 
