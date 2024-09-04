@@ -1,0 +1,13 @@
+* no.olavfosse.malt
+This is an effort to port [[https://github.com/themetaschemer/malt][Malt]] to Clojure. Malt is a minimalistic deep
+learning toolkit designed to support the book [[https://www.thelittlelearner.com][The Little Learner]].
+
+The goal for no.olavfosse.malt is for it to be pleasant to work
+through The Little Learner in Clojure. no.olavfosse.malt's API is a
+one-to-one port of upstream with some extra conveniences and
+interactive visualizations. no.olavfosse.malt is designed to be used
+in conjunction with [[https://book.clerk.vision][Clerk]].
+
+* [[file:nbs/the_littlest_learner.clj][The Littlest Learner]]
+This notebook is a summary of the book for the purpose of teaching and
+testing no.olavfosse.malt.
