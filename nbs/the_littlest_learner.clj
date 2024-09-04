@@ -2,7 +2,7 @@
   ;; - [ ] Make the plots from chapter one
   (:require [nextjournal.clerk.viewer :as clv]
             [nextjournal.clerk :as cle]
-            [no.olavfosse.malt :refer-all])
+            [no.olavfosse.malt :refer :all])
   (:import java.awt.image.BufferedImage))
 
 (axes-grid {:height 300
