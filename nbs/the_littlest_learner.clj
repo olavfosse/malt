@@ -8,7 +8,7 @@
 
 (def line-xs [2.0 1.0 4.0 3.0])
 (def line-ys [1.8 1.2 4.2 3.3])
-(plot {:range [[-1 5] [-1 5]]
+#_(plot {:range [[-1 5] [-1 5]]
        ;; :cells-per-axis-unit 2
        :points (map vector line-xs line-ys)})
 

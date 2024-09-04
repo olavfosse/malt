@@ -41,7 +41,7 @@
     (doseq [[x y] (map (project spec) points)]
       (draw-dot img x y))
     grid))
-run!
+
 (defn plot [x]
   (cond
     (fn? x) (plot {:f x
