@@ -1,0 +1,4 @@
+{:deps {org.clojure/clojure {:mvn/version "1.12.0-rc1"}
+        io.github.nextjournal/clerk {:mvn/version "0.16.1016"}
+        ;; https://github.com/nextjournal/clerk/issues/642
+        io.github.nextjournal/markdown {:git/sha "6683c48dfdb23404a23057817b6ac3acf0310bca"}}}
