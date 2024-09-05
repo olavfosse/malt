@@ -1,0 +1,3 @@
+- [X] function plots
+- [X] scatter plots
+- [ ] combined function and scatter plots
