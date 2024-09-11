@@ -1,3 +1,5 @@
 - [X] function plots
 - [X] scatter plots
-- [ ] combined function and scatter plots
+- [X] combined function- and scatter plots
+- [ ] implement Arithmetic protocol
+- [ ] plot a loss

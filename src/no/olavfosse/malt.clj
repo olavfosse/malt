@@ -1,15 +1,113 @@
 (ns no.olavfosse.malt
-  ;; - [ ] Make the plots from chapter one
+  ;; - [x] Make the plots from chapter one
   (:require [nextjournal.clerk.viewer :as clv]
-            [nextjournal.clerk :as cle])
+            [nextjournal.clerk :as cle]
+            [clojure.core :as cc])
   (:import java.awt.image.BufferedImage))
 
-;; Perhaps I should think in terms of projection?
+(defprotocol Arithmetic
+  (+ [a b])
+  (- [a b])
+  (* [a b])
+  (/ [a b]))
 
+(let [ccops {:+ (fn [a b] (if (number? b)
+                            (cc/+ a b)
+                            (+ b a)))
+             :- cc/-
+             :* (fn [a b] (if (number? b)
+                            (cc/* a b)
+                            (* b a)))
+             :/ cc//}]
+  (extend clojure.lang.Numbers
+    Arithmetic
+    ccops)
+  (extend Number
+    Arithmetic
+    ccops))
+
+(+ 1 2 )
+
+;; # Data structures
+;; For now we're merely using vectors as tensors, but I think that
+;; might be too slow in the long run.
+
+
+
+
+
+
+
+
+
+
+
+
+(defn line [x] ;; x is the formal
+  (fn [θ] ;; θ is the parameters
+    (+ (* (first θ) x) (second θ))))
+
+(defn sum [xs]
+  (transduce identity + xs))
+
+(defn sqr [x]
+  (* x x))
+
+(defn l2-loss [target]
+  (fn [xs ys]
+    (fn [θ]
+      (let [pred-ys ((target xs) θ)]
+        (sum (sqr (- ys pred-ys)))))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+(defn scalar? [x]
+  (or (number? x) #_(dual? x)))
+
+(defn shape [t]
+  (if (scalar? t)
+    (list)
+    (conj (shape (first t)) (count t))))
+
+(defn rank [t]
+  (count (shape t)))
+
+(defn sum¹ [t]
+  (if (= (rank t) 1)
+    (reduce + t)
+    (mapv sum¹ t)))
 ;; ===========================
 ;;       Visualization &
 ;;         Tangibility
 ;; ===========================
+
+(defn unit-lengths [{:as spec
+                     :keys [width height]
+                     [[x-min x-max] [y-min y-max]] :range}]
+  (let [x-units (- x-max x-min)
+        y-units (- y-max y-min)]
+    [(/ width x-units) (/ height y-units)]))
+
+(defn origin-offset [{:as spec
+                      :keys [height]
+                      [[x-min x-max] [y-min y-max]] :range}]
+  (let [[x-unit y-unit] (unit-lengths spec)]
+    [(* x-unit (- x-min)) (+ height (* y-unit y-min))]))
+
 (defn- border? [{:as spec :keys [width height]} x y]
   (or (#{0 (dec width)} x) (#{0 (dec height)} y)))
 
@@ -24,9 +122,14 @@
         (.setRGB img x y
                  (cond
                    (axis? spec x y) 0xFF
-                   (border? spec x y) 0x00
                    :else 0xF0F0F0 #_(+ 0xFFFFFF (* 10 x) (* 10 y))))))
     img))
+
+(defn draw-border [img {:as spec :keys [width height unit]}]
+  (dotimes [x width]
+    (dotimes [y height]
+      (when (border? spec x y)
+        (.setRGB img x y 0x00)))))
 
 (defn set-rgb
   "Like .setRGB but tolerates out of bounds writes"
@@ -43,28 +146,33 @@
     (fn [[x y]]
       [(+ x-offset (* x x-unit)) (- y-offset (* y y-unit))])))
 
-(defn fill-out [spec]
-  (merge {:range [[-3 3] [-3 3]]
-          :width 300
-          :height 300}
-         spec))
+(defn normalize-features [spec]
+  (-> spec
+      (dissoc :f)
+      (dissoc :points)
+      (update :features #(cond-> %
+                           (:f spec) (conj (:f spec))
+                           (:points spec) (conj (:points spec))))))
+
+(defn dwim
+  "Takes a vague plot spec from the client and transforms it into a
+  explicit plot spec for the internal system. Tries to be smart about
+  it."
+  [spec]
+  (-> (merge {:range [[-6 6] [-6 6]]
+              :width 500
+              :height 500}
+             (cond (fn? spec) {:f spec}
+                   :else spec))
+      normalize-features))
 
 ;; Glossary
 ;; ---------
 ;; Offset   The coordinate of a pixel in a raster
 
-(defn unit-lengths [{:as spec
-                     :keys [width height]
-                     [[x-min x-max] [y-min y-max]] :range}]
-  (let [x-units (- x-max x-min)
-        y-units (- y-max y-min)]
-    [(/ width x-units) (/ height y-units)]))
 
-(defn origin-offset [{:as spec
-                      :keys [height]
-                      [[x-min x-max] [y-min y-max]] :range}]
-  (let [[x-unit y-unit] (unit-lengths spec)]
-    [(* x-unit (- x-min)) (+ height (* y-unit y-min))]))
+
+
 
 (defn draw-dot [img x y]
   (set-rgb img x (dec y) 0)
@@ -73,32 +181,26 @@
   (set-rgb img (inc x) y 0)
   (set-rgb img x (inc y) 0))
 
-(defn plot-points [{:as spec :keys [range points]}]
-  ;; WT=wishful thought
-  ;; WT: axes-grid understand range
-  (let [spec (fill-out spec)
-        grid (axes-grid spec)]
-    (transduce (map (project spec))
-               (completing (fn [_ [x y]] (draw-dot grid x y)))
-               nil
-               points)
-    grid))
-
-(defn plot-fn [{:as spec
-                :keys [f height width]
-                [[x-min x-max]] :range}]
-  (let [grid (axes-grid spec)]
-    (doseq [[x y] (->> (range x-min x-max 0.001)
-                       (map (juxt identity f))
-                       (map (project spec)))]
-      (set-rgb grid x y  0xFF00))
-    grid))
+(defn draw-features [img {:as spec
+                          :keys [features]
+                          [[x-min x-max]] :range}]
+  (doseq [f features]
+    (cond
+      (fn? f) (doseq [[x y] (->> (range x-min x-max 0.001)
+                                 (map (juxt identity f))
+                                 (map (project spec)))]
+                (set-rgb img x y  0xFF00))
+      (seqable? f) (transduce (map (project spec))
+                              (completing (fn [_ [x y]] (draw-dot img x y)))
+                              nil
+                              f))))
 
 (defn plot [spec]
-  (if (fn? spec)
-    (plot {:f spec})
-    (let [spec (fill-out spec)]
-      (if (:points spec)
-        (plot-points spec)
-        (plot-fn spec)))))
+  (let [spec (dwim spec)]
+    (doto (axes-grid spec)
+      (draw-features spec)
+      (draw-border spec))))
 
+
+
+(fn [θ] )
