@@ -106,7 +106,7 @@
                       :keys [height]
                       [[x-min x-max] [y-min y-max]] :range}]
   (let [[x-unit y-unit] (unit-lengths spec)]
-    [(* x-unit (- x-min)) (+ height (* y-unit y-min))]))
+    [(* x-unit (- 0 x-min)) (+ height (* y-unit y-min))]))
 
 (defn- border? [{:as spec :keys [width height]} x y]
   (or (#{0 (dec width)} x) (#{0 (dec height)} y)))
