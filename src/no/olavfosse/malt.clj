@@ -11,22 +11,34 @@
   (* [a b])
   (/ [a b]))
 
-(let [ccops {:+ (fn [a b] (if (number? b)
-                            (cc/+ a b)
-                            (+ b a)))
-             :- cc/-
-             :* (fn [a b] (if (number? b)
-                            (cc/* a b)
-                            (* b a)))
-             :/ cc//}]
-  (extend clojure.lang.Numbers
-    Arithmetic
-    ccops)
-  (extend Number
-    Arithmetic
-    ccops))
+(def base-ops
+  {:+ (fn [a b] (if (number? b)
+                  (cc/+ a b)
+                  (+ b a)))
+   :- cc/-
+   :* (fn [a b] (if (number? b)
+                  (cc/* a b)
+                  (* b a)))
+   :/ cc//})
 
-(+ 1 2 )
+(extend clojure.lang.Numbers
+  Arithmetic
+  base-ops)
+(extend Number
+  Arithmetic
+  base-ops)
+
+(extend clojure.lang.PersistentVector
+  Arithmetic
+  (into {}
+        (map (fn [[op-name base-op]]
+               [op-name (let [protocol-op (resolve (symbol op-name))]
+                          (fn [a b]
+                            (if (vector? b) 
+                              (mapv protocol-op a b)
+                              (mapv #(protocol-op % b) a))))]))
+        base-ops))
+
 
 ;; # Data structures
 ;; For now we're merely using vectors as tensors, but I think that
@@ -88,6 +100,16 @@
 
 (def ^:dynamic revs)
 (def ^:dynamic α)
+
+(defn ⋆¹-¹ [w t]
+  (sum¹ (* w t)))
+
+(def ⋆ ⋆¹-¹)
+
+(defn plane [t] ;; t is a coordinate
+  (fn [θ]
+    (+ (⋆ (first θ) t) ;; (first θ) is coeffiscients
+       (second θ))))
 
 
 ;; ===========================
@@ -203,4 +225,3 @@
 
 
 
-(fn [θ] )
