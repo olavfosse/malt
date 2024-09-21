@@ -7,7 +7,7 @@
 
 
 
-;; # Chapter 1
+
 
 (def line-xs [2.0 1.0 4.0 3.0])
 (def line-ys [1.8 1.2 4.2 3.3])
@@ -39,6 +39,8 @@
 ;;
 ((l2-loss line) line-xs line-ys)
 
+(def quad-xs [-1.0 0.0 1.0 2.0 3.0])
+(def quad-ys [2.55 2.1 4.35 10.2 18.25])
 
 ;; # Glossary
 ;; ## θ

@@ -47,6 +47,12 @@
   (fn [θ] ;; θ is the parameters
     (+ (* (first θ) x) (second θ))))
 
+(declare sqr)
+(defn quad [t]
+  (fn [θ]
+    (+ (* (first θ) (sqr t))
+       (+ (* (second θ) t) (nth θ 2)))))
+
 (defn sum [xs]
   (transduce identity + xs))
 
@@ -59,21 +65,10 @@
       (let [pred-ys ((target xs) θ)]
         (sum (sqr (- ys pred-ys)))))))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+(defn revise [f revs θ]
+  (if
+    (zero? revs) θ
+    (revise f (dec revs) (f θ))))
 
 (defn scalar? [x]
   (or (number? x) #_(dual? x)))
@@ -90,6 +85,11 @@
   (if (= (rank t) 1)
     (reduce + t)
     (mapv sum¹ t)))
+
+(def ^:dynamic revs)
+(def ^:dynamic α)
+
+
 ;; ===========================
 ;;       Visualization &
 ;;         Tangibility
