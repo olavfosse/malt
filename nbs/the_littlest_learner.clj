@@ -79,3 +79,4 @@ l2-loss
 ;; A real number measuring how well we're achieving our objective. The lower the number the better.
 '(((l2-loss line) line-xs line-ys) [0 1])
 
+

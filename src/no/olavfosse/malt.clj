@@ -5,6 +5,7 @@
             [clojure.core :as cc])
   (:import java.awt.image.BufferedImage))
 
+;; I think ultimately this won't be implemented with protocols
 (defprotocol Arithmetic
   (+ [a b])
   (- [a b])
@@ -81,6 +82,25 @@
   (if
     (zero? revs) θ
     (revise f (dec revs) (f θ))))
+
+;; ∇ is currently implemented by means of numeric differentiation,
+;; ideally it should be implemented with automatic differentiation,
+;; but I did not managed to understand how Malt autodiff works. I'd
+;; love some help with understanding how it works so that I can port
+;; it to no.olavfosse.malt, so feel free to dm me if you want to give
+;; me a autodiff lesson :^).
+
+#_(def small 0.0001)
+#_(defn ∇ [f θ]
+  (/ (- (f (+ θ small)) (f θ)) small))
+
+#_(defn gradient-descent [obj θ]
+  (let [f (fn [θ']
+            (map (fn [p g]
+                   (- p (* α g)))
+                 θ'
+                 (∇ obj θ')))]
+    (revise f revs θ)))
 
 (defn scalar? [x]
   (or (number? x) #_(dual? x)))
