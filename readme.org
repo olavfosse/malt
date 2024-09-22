@@ -8,6 +8,13 @@ one-to-one port of upstream with some extra conveniences and
 interactive visualizations. no.olavfosse.malt is designed to be used
 in conjunction with [[https://book.clerk.vision][Clerk]].
 
+* How to run it?
+
+1. Install Clojure
+2. Start the notebooks with =$ clj=
+3. Save a notebook file (nbs/*) to render your changes
+4. (not optional) Set up https://cider.mx for a goated dev env
+
 * [[file:nbs/the_littlest_learner.clj][The Littlest Learner]]
 This notebook is a summary of the book for the purpose of teaching and
 testing no.olavfosse.malt.

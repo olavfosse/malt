@@ -67,7 +67,7 @@
        (+ (* (second θ) t) (nth θ 2)))))
 
 (defn sum [xs]
-  (transduce identity + xs))
+  (transduce identity cc/+ xs))
 
 (defn sqr [x]
   (* x x))
